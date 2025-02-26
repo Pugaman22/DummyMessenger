@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     # asyncpg pool settings
     PG_POOL_MIN_SIZE: int = Field(default=10)
     PG_POOL_MAX_SIZE: int = Field(default=100)
-    PG_POOL_MAX_QUERIES: int = Field(default=100000)
+    PG_POOL_MAX_QUERIES: int = Field(default=10000)
     PG_POOL_CONNECTION_LIFETIME: float = Field(default=360.0)
 
     @property
