@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
 app: FastAPI = FastAPI(lifespan=lifespan)
 
 
-@app.post('/message')
+@app.post("/message")
 async def message(payload: MessageRequest):
     """Принимает сообщение, сохраняет его в БД и возвращает 10 последних сообщений."""
     try:
@@ -37,27 +37,22 @@ async def message(payload: MessageRequest):
         last_message_index = await pg_pool.fetch(last_index_query)
         message_index = (last_message_index[0]['last_index'] or 0) + 1
 
-        # Сохранение сообщения
         insert_query = """
-                INSERT INTO messages (user_name, text, created_at, message_index, user_message_count) 
-                VALUES ($1, $2, $3, $4, $5)
-            """
-        await pg_pool.execute(insert_query, payload.user_name, payload.text, datetime.utcnow(), message_index,
-                              user_message_count)
+            INSERT INTO messages (user_name, text, created_at, message_index, user_message_count) 
+            VALUES ($1, $2, $3, $4, $5)
+        """
+        await pg_pool.execute(insert_query, payload.user_name, payload.text, datetime.utcnow(), message_index, user_message_count)
         logger.info(f"Message saved: {payload.user_name} - {payload.text}")
 
-        # Получение 10 последних сообщений
         last_messages_query = """
-                SELECT user_name, text, created_at, message_index, user_message_count
-                FROM messages
-                ORDER BY created_at DESC
-                LIMIT 10
-            """
+            SELECT user_name, text, created_at, message_index, user_message_count
+            FROM messages
+            ORDER BY created_at DESC
+            LIMIT 10
+        """
         last_messages = await pg_pool.fetch(last_messages_query)
-
         return {"messages": [dict(msg) for msg in last_messages]}
 
     except Exception as e:
-        logger.error(f"Error: {str(e)}")
-        raise HTTPException(status_code=500, detail={"error": "Internal server error",
-                                                     "detail": 'An unexpected error occurred'})
+        logger.error(f"❌ Error in /message: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")

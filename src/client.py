@@ -15,7 +15,7 @@ USERS = [f"User{i}" for i in range(10)]
 
 
 async def send_request(session: ClientSession, url: str) -> dict:
-    """POST запрос с сообщением на указанный URL."""
+    """POST requests sens message on specified URL."""
     payload = {
         "user_name": random.choice(USERS),
         "text": f"This message is from {random.choice(USERS)}!"
@@ -25,13 +25,13 @@ async def send_request(session: ClientSession, url: str) -> dict:
 
 
 async def make_session() -> None:
-    """Создаёт сессию и отправляет 100 запросов."""
+    """Create session and sends 100 requests."""
     async with ClientSession() as session:
         for _ in range(REQUESTS_PER_COROUTINE):
             url = random.choice(REPLICA_URLS)
             try:
                 response = await send_request(session, url)
-                # logger.info(f"Response: {response}")
+                logger.info(f"Response: {response}")
             except Exception as e:
                 logger.error(f"Request failed: {e}")
 
